@@ -1,6 +1,6 @@
 const {Router} = require('express');
 const { z } = require('zod');
-const { adminmodel } = require('../db');
+const { adminModel } = require('../db');
 const adminRouter = Router();
 const bcrypt = require('bcrypt');
 const { JWT_ADMIN_SECRET } = require('../config')
@@ -36,7 +36,7 @@ adminRouter.post('/signup', async function(req, res){
 
         const hashedpassword = await bcrypt.hash(password, 5)
 
-        const admin = await adminmodel.create({
+        const admin = await adminModel.create({
             email:email,
             password: hashedpassword,
             firstname:firstname,
@@ -134,7 +134,7 @@ adminRouter.put('/update', app, async function(req, res) {
         const amdinid = req.userId
         const {email,password,firstname,lastname,image} = req.body;
 
-        const updatedbody = await adminmodel.findByIdAndUpdate({
+        const updatedbody = await adminModel.findByIdAndUpdate({
           _id : amdinid
         },{
             email:email,

@@ -8,9 +8,9 @@ console.log(process.env.MONGO_URL)
 
 
 const {adminRouter} = require('./routes/admin');
-const {userRouter} = require('./routes/user');
+// const {userRouter} = require('./routes/user');
 
-app.use('/user',userRouter)
+// app.use('/user',userRouter)
 app.use('/admin',adminRouter)
 
 async function main(){
