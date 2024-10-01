@@ -8,9 +8,10 @@ console.log(process.env.MONGO_URL)
 
 
 const {adminRouter} = require('./routes/admin');
-// const {userRouter} = require('./routes/user');
+const { adminModel } = require('./db');
+const {userRouter} = require('./routes/user');
 
-// app.use('/user',userRouter)
+ app.use('/user',userRouter)
 app.use('/admin',adminRouter)
 
 async function main(){
@@ -22,6 +23,7 @@ async function main(){
         console.error(e);
     }
 }
+
 main()
 app.listen(port,()=>{
     console.log(`App is listening to the port ${port}`);

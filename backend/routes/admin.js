@@ -3,7 +3,7 @@ const { z } = require('zod');
 const { adminModel } = require('../db');
 const adminRouter = Router();
 const bcrypt = require('bcrypt');
-const { JWT_ADMIN_SECRET } = require('../config')
+const { Jwt_admin_secrte } = require('../config')
 const jwt = require('jsonwebtoken')
 const {app} = require('../middleware/adminmiddleware')
 const multer = require('multer');
@@ -131,20 +131,36 @@ adminRouter.put('/update', app, async function(req, res) {
             })
             return
         }
-        const amdinid = req.userId
+        const adminid = req.userId
         const {email,password,firstname,lastname,image} = req.body;
 
-        const updatedbody = await adminModel.findByIdAndUpdate({
-          _id : amdinid
-        },{
-            email:email,
-            password:password,
-            firstname:firstname,
-            lastname:lastname,
-            image:image
-        },{
-            new:true
-        })
+        const UpdatedBody = {};
+
+        if(email) {
+            UpdatedBody.email = email;
+                }
+        if(password) {
+            UpdatedBody.firstname = firstname;
+        }
+
+        if(lastname) {
+            UpdatedBody.lastname = lastname;
+        }
+
+        if(image){
+            UpdatedBody.image = image;
+        }
+
+        if(password) {
+            const hashedpassword = await bcrypt.hash(password, 5);
+            UpdatedBody.password = hashedpassword;
+        }
+
+        const updatedbody = await adminModel.findByIdAndUpdate(
+            adminid,
+            UpdatedBody,
+            { new: true}
+        )
 
         if(updatedbody){
             res.status(200).json({
@@ -161,8 +177,42 @@ adminRouter.put('/update', app, async function(req, res) {
     }
 })
 
+adminRouter.delete('/delete',app,async function(req, res){
+    try{
+        const requiredbody=z.object({
+            email:z.string().min(3).max(100).email().optional(),
+        })
 
+        const parsedbody = requiredbody.safeParse(req.body);
+        if(!parsedbody.success){
+            res.status(400).json({
+                message:"You have entered something wrong",
+                error : parsedbody.error
+            })
+            return
+        }
+        const adminId = req.userId
+        const {email} = req.body;
 
+        const deleteuser = await adminModel.findByIdAndDelete({
+            _id:adminId,
+            email:email
+        });
+
+        if(deleteuser){
+            res.status(200).json({
+                message:"User deleted successfully",
+                deleteuser:deleteuser
+            })
+        } else{
+            res.status(404).json({
+                message:"something error occured",
+            })
+        }
+    } catch(e){
+        console.error(e)
+    }
+})
 
 module.exports={
     adminRouter : adminRouter
