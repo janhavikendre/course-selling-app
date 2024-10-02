@@ -7,7 +7,7 @@ const { purchaseModel, courseModel } = require('../db');
 courseRoute.post('/purchase', usermiddleware, async (req, res) => {
     try {
         const userId = req.userId;
-        const { courseId, transactionId, paymentMethod, amount } = req.body;
+        const { courseId, paymentMethod, amount } = req.body;
         
         const course = await courseModel.findById(courseId);
         if (!course) {
@@ -18,7 +18,7 @@ courseRoute.post('/purchase', usermiddleware, async (req, res) => {
         const purchase = await purchaseModel.create({
             userId: userId,
             courseId: courseId,
-            transactionId: transactionId,
+            
             amount: amount,
             paymentMethod: paymentMethod,
             status: "Completed"
