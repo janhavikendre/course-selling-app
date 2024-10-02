@@ -9,7 +9,7 @@ const {app} = require('../middleware/adminmiddleware')
 const multer = require('multer');
 const { admincourse } = require('./admincourses');
 
-// adminRouter.use('/course',admincourse);
+adminRouter.use('/course',admincourse);
 
 adminRouter.post('/signup', async function(req, res){
     try{
