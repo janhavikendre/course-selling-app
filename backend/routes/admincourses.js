@@ -1,175 +1,122 @@
-const {Router} = require('express');
-const {app} = require('../middleware/adminmiddleware')
-const {courseModel} = require('../db');
-const { z } = require('zod');
+const { Router } = require('express');
 const admincourse = Router();
+const { app } = require('../middleware/adminmiddleware');
+const { courseModel } = require('../db');
+const { z } = require('zod');
 
-admincourse.post('/create',app,async function(req,res){
-    try{
+
+admincourse.post('/create', app, async function (req, res) {
+    try {
         const requiredbody = z.object({
-         title :z.string(),
-         description:z.string(),
-         imageUrl : z.string(),
-         price:z.string(),
-         category:z.string(),
-         difficulty:z.string()
-        })
-     
-        const parsedbody = requiredbody.safeParse(req.body);
-        if(!parsedbody.success){
-         res.status(404).json({
-             message:"You have entered something wrong",
-             error : parsedbody.error
-         })
-         return
-        }
-        const adminId = req.userId
-        const {title, description,imageUrl,price,category,difficulty,level,tags} = req.body;
-        
-        const courses = await courseModel.create({
-           title : title,
-           description:description,
-           imageUrl:imageUrl,
-           price:price,
-           creatorId:adminId,
-           category:category,
-           difficulty:difficulty,
-           level:level,
-           tags:tags      
-        })
-     
-        if(courses){
-            res.status(200).json({
-             message:"Course craeted ",
-             courses,
-             id:courses._id
-            })
-        }
-       } catch(e){
-          console.error(e)
-       }  
-})
-
-admincourse.put('/add-lesson',app,async function(req,res){
-    try{
-      const lessonSchema = z.object({
-        courseId : z.string(),
-        lesson:z.array(
-            z.object({
-                title:z.string(),
-                content:z.string().optional(),
-                videoUrl:z.string().optional(),
-                duration:z.number().optional()
-            })
-        )
-      })
-
-      const parsedbody = lessonSchema.safeParse(req.body);
-      if(!parsedbody){
-        return res.status(400).json({
-            message:"Invalid lesson data",
-            error:parsedbody.error
-        })
-      }
-
-      const {courseId,lesson} = req.body;
-
-      const updatedCourses = await courseModel.findByIdAndUpdate(
-         courseId,         
-        {$push:{lessons:{$each:lesson}}},
-        {new:true,useFindAndModify: false}
-    )
-
-    if(updatedCourses){
-        res.status(200).json({
-            message:"Lesson added successfuly",
-            updatedCourses
-        })
-    }else{
-        res.status(404).json({
-            message:"Course not found"
-        })
-    }
-    }catch(e){
-        console.error(e)
-    }
-})
-
-admincourse.put('/update',async function(req,res){
-    try{
-        const adminId = req.userId;
-        const {title,description,imageUrl,price,courseId,category,difficulty,level,tags} = req.body;
-        const courses = await courseModel.updateOne({
-            _id:courseId,
-            creatorId:adminId
-        },{
-            title:title,
-            description:description,
-            imageUrl:imageUrl,
-            price:price,
-            category:category,
-            difficulty:difficulty,
-            level:level,
-            tags:tags
-        },{
-            new : true
-        })
-        
-        if(courses){
-           res.status(200).json({
-            message:"Course updated successfully",
-            courses
-           })
-        }
-    }catch(e){
-    console.error(e)
-    } 
-})
-
-admincourse.get('/get',app,async function(req,res){
-    try{
-        const adminId = req.userId;
-
-        const courses = await courseModel.find({
-           creatorId:adminId
+            title: z.string(),
+            description: z.string(),
+            imageUrl: z.string(),
+            price: z.string(),
+            category: z.string(),
+            difficulty: z.string(),
         });
-        if(courseModel){
-           res.status(200).json({
-               message:"Here are your courses",
-               courses
-   
-           })
+
+        const parsedbody = requiredbody.safeParse(req.body);
+        if (!parsedbody.success) {
+            res.status(404).json({
+                message: "You have entered something wrong",
+                error: parsedbody.error,
+            });
+            return;
         }
-       }catch(e){
-          console.error(e)
-       }
-})
 
-admincourse.delete('/delte',app,async function(req,res){
-    try{
-    const adminId = req.userId;
-    const courseId = req.body.courseId;
+        const adminId = req.userId;
+        const { title, description, imageUrl, price, category, difficulty } = req.body;
 
-    const coursedelteion = await courseModel.deleteOne({
-        creatorId:adminId,
-        courseId:courseId
-    })
+     
+        const courses = await courseModel.create({
+            title,
+            description,
+            imageUrl,
+            price,
+            creatorId: adminId,
+            category,
+            difficulty,
+        });
 
-    if(coursedelteion){
-        return res.status(200).json({
-            message:"Course deleted successfully",
-            courseId
-        })
-    }else{
-        return res.status(400).json({
-            message:"Something went wrong in deletion"
-        })
+        res.status(200).json({
+            message: "Course created successfully",
+            courses,
+            id: courses._id,
+        });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ message: "Internal server error" });
     }
-    }catch(e){
+});
 
+admincourse.put('/update', app, async function (req, res) {
+    try {
+        const adminId = req.userId;
+        const { title, description, imageUrl, price, courseId, category, difficulty } = req.body;
+
+     
+        const courses = await courseModel.updateOne(
+            { _id: courseId, creatorId: adminId },
+            { title, description, imageUrl, price, category, difficulty },
+            { new: true }
+        );
+
+        res.status(200).json({
+            message: "Course updated successfully",
+            courses,
+        });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ message: "Internal server error" });
     }
-})
+});
 
-module.exports={
-    admincourse:admincourse,
-}
+
+admincourse.get('/get', app, async function (req, res) {
+    try {
+        const adminId = req.userId;
+
+        const courses = await courseModel.find({ creatorId: adminId });
+        if (courses.length > 0) {
+            res.status(200).json({
+                message: "Here are your courses",
+                courses,
+            });
+        } else {
+            res.status(404).json({ message: "No courses found" });
+        }
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
+
+
+admincourse.delete('/delete', app, async function (req, res) {
+    try {
+        const adminId = req.userId;
+        const courseId = req.body.courseId;
+
+        // Delete the course based on courseId and creatorId
+        const courseDeletion = await courseModel.deleteOne({ _id: courseId, creatorId: adminId });
+
+        if (courseDeletion.deletedCount > 0) {
+            res.status(200).json({
+                message: "Course deleted successfully",
+                courseId,
+            });
+        } else {
+            res.status(400).json({
+                message: "Course not found or you don't have permission",
+            });
+        }
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
+
+module.exports = {
+    admincourse,
+};
