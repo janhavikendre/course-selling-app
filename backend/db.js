@@ -31,7 +31,7 @@ const courseSchema = new mongoose.Schema({
 const purchaseSchema = new mongoose.Schema({
     userId: { type: ObjectId, ref: 'user' },  
     courseId: { type: ObjectId, ref: 'course' },  
-    transactionId: String,
+
     paymentMethod: String,
     status: { type: String, default: 'pending' }
 }, { timestamps: true });
