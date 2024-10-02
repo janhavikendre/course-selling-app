@@ -1,5 +1,5 @@
 const {Router} = require('express');
-    const { z } = require('zod');
+const { z } = require('zod');
 const {userModel, ActivityLogModel} = require('../db')
 const userRouter = Router();
 const bcrypt = require('bcrypt');
@@ -9,7 +9,7 @@ const {usermiddleware} = require('../middleware/usermiddleware')
 //const {sendWelcomeEmail} = require('../emailservice/emailService');
 //const { logActivity } = require('../middleware/logActivity');
 
-userRouter.post('signup',async function(req, res){
+userRouter.get('signup',async function(req, res){
     try{
         const requiredbody = z.object({
             email:z.string().min(3).max(100).email(),
@@ -31,7 +31,7 @@ userRouter.post('signup',async function(req, res){
         }
 
         const {email, password, firstname, lastname, image} = req.body;
-        const hashedpassword = await bcrypy.hash(password,5)
+        const hashedpassword = await bcrypt.hash(password,5)
 
         const user = await userModel.create({
             email:email,
@@ -113,7 +113,7 @@ userRouter.post('/signin',async function(req, res){
      }
  })
  
- userRouter.use(logActivity);
+ //userRouter.use(logActivity);
 
  userRouter.put("/update",usermiddleware,async function(req,res){
     try{
