@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken')
 const {usermiddleware} = require('../middleware/usermiddleware')
 
 
-userRouter.get('signup',async function(req, res){
+userRouter.post('/signup',async function(req, res){
     try{
         const requiredbody = z.object({
             email:z.string().min(3).max(100).email(),
