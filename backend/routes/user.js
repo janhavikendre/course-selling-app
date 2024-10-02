@@ -1,13 +1,12 @@
 const {Router} = require('express');
 const { z } = require('zod');
-const {userModel, ActivityLogModel} = require('../db')
+const {userModel} = require('../db')
 const userRouter = Router();
 const bcrypt = require('bcrypt');
 const { Jwt_user_secrte } = require('../config');
 const jwt = require('jsonwebtoken')
 const {usermiddleware} = require('../middleware/usermiddleware')
-//const {sendWelcomeEmail} = require('../emailservice/emailService');
-//const { logActivity } = require('../middleware/logActivity');
+
 
 userRouter.get('signup',async function(req, res){
     try{
@@ -42,7 +41,6 @@ userRouter.get('signup',async function(req, res){
         })
 
         if(user){
-            await sendWelcomeEmail(user.email,user.firstname)
             res.status(200).json({
                 message:"User created successfully",
                 user,
@@ -94,11 +92,7 @@ userRouter.post('/signin',async function(req, res){
                 id:user._id
             },Jwt_user_secrte)
 
-            await ActivityLogModel.create({
-                userId:user._id,
-                action:'login',
-                details:`User logged in at ${new Date().toLocaleString()}`,
-            })
+          
             res.status(200).json({
                 alert:"Password verified successfully",
                 message:'You have logged in',
@@ -113,7 +107,7 @@ userRouter.post('/signin',async function(req, res){
      }
  })
  
- //userRouter.use(logActivity);
+ 
 
  userRouter.put("/update",usermiddleware,async function(req,res){
     try{
